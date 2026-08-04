@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Câmeras - Monitoramento</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a2e;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #2a4b7d, #939ebf);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e94560;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-logo {
+            
+            color: white;
+            font-weight: bold;
+            font-size: 1.4rem;
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+
+        .header-title {
+            font-size: 3.3rem;
+            font-weight: 600;
+            color: #080b0c;
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .header-date {
+            font-size: 3.95rem;
+            font-weight: bold;
+            color: #070808;
+        }
+
+        .header-time {
+            font-size: 3.2rem;
+            font-weight: bold;
+            color: #060404;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            background-color: #16213e;
+            padding: 12px 30px;
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            border-bottom: 1px solid #0f3460;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .status-item .label {
+            color: #a8d8ea;
+        }
+
+        .status-item .value {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .status-item.total .value { color: #ffffff; }
+        .status-item.online .value { color: #00e676; }
+        .status-item.offline .value { color: #e94560; }
+
+        /* Controls */
+        .controls {
+            background-color: #16213e;
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #0f3460;
+        }
+
+        .btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #e94560;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #d63851;
+        }
+
+        .btn-secondary {
+            background-color: #0f3460;
+            color: #a8d8ea;
+            border: 1px solid #0f3460;
+        }
+
+        .btn-secondary:hover {
+            background-color: #1a4a7a;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-box input {
+            padding: 8px 14px;
+            border: 1px solid #0f3460;
+            border-radius: 5px;
+            background-color: #1a1a2e;
+            color: white;
+            font-size: 0.9rem;
+            width: 250px;
+        }
+
+        .search-box input::placeholder {
+            color: #666;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 25px 30px;
+        }
+
+        .camera-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 18px;
+        }
+
+        /* Camera Card */
+        .camera-card {
+            background: linear-gradient(145deg, #1e2a4a, #16213e);
+            border: 1px solid #0f3460;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .camera-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(233, 69, 96, 0.15);
+            border-color: #e94560;
+        }
+
+        .camera-card.online {
+            border-left: 4px solid #00e676;
+        }
+
+        .camera-card.offline {
+            border-left: 4px solid #e94560;
+            opacity: 0.85;
+        }
+
+        .camera-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .camera-name {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .camera-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .camera-status.online {
+            background-color: rgba(0, 230, 118, 0.15);
+            color: #00e676;
+        }
+
+        .camera-status.offline {
+            background-color: rgba(233, 69, 96, 0.15);
+            color: #e94560;
+        }
+
+        .camera-details {
+            margin-top: 10px;
+        }
+
+        .camera-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(15, 52, 96, 0.5);
+        }
+
+        .camera-detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #a8d8ea;
+            font-size: 0.85rem;
+        }
+
+        .detail-value {
+            color: #ffffff;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: right;
+            word-break: break-all;
+        }
+
+        .detail-value.ip {
+            font-family: 'Courier New', monospace;
+            color: #ffd54f;
+        }
+
+        /* Check/X indicators */
+        .indicator {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .indicator.ok {
+            color: #00e676;
+        }
+
+        .indicator.fail {
+            color: #e94560;
+        }
+
+        /* Pulse animation for online status */
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .pulse-dot.online {
+            background-color: #00e676;
+            animation: pulse 2s infinite;
+        }
+
+        .pulse-dot.offline {
+            background-color: #e94560;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(0, 230, 118, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
+        }
+
+        /* Add Camera Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #1e2a4a;
+            border: 1px solid #0f3460;
+            border-radius: 12px;
+            padding: 30px;
+            width: 450px;
+            max-width: 90%;
+        }
+
+        .modal h2 {
+            color: #e94560;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #a8d8ea;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #0f3460;
+            border-radius: 5px;
+            background: #1a1a2e;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .status-bar {
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .camera-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-logo"></div>
+            <img src="afm00.PNG" alt="Logo">
+            <div class="header-title">BEM-vINDO DE CÂMERAS TI</div>
+        </div>
+        <div class="header-right">
+            <div class="header-date" id="headerDate"></div>
+            <div class="header-time" id="headerTime"></div>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="status-item total">
+            <span class="label">Total:</span>
+            <span class="value" id="totalCameras">0 câmeras</span>
+        </div>
+        <div class="status-item online">
+            <span class="label">Online:</span>
+            <span class="value" id="onlineCount">0</span>
+        </div>
+        <div class="status-item offline">
+            <span class="label">Offline:</span>
+            <span class="value" id="offlineCount">0</span>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Buscar câmera por nome ou IP..." oninput="filterCameras()">
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-secondary" onclick="refreshAll()">⟳ Atualizar</button>
+            <button class="btn btn-primary" onclick="openModal()">+ Adicionar Câmera</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="camera-grid" id="cameraGrid">
+            <!-- Cards serão gerados dinamicamente -->
+        </div>
+    </div>
+
+    <!-- Modal Adicionar Câmera -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h2>Adicionar Câmera</h2>
+            <div class="form-group">
+                <label>Nome da Câmera</label>
+                <input type="text" id="camName" placeholder="Ex: Câmera Entrada Principal">
+            </div>
+            <div class="form-group">
+                <label>Endereço IP</label>
+                <input type="text" id="camIP" placeholder="Ex: 192.168.1.100">
+            </div>
+            <div class="form-group">
+                <label>Localização</label>
+                <input type="text" id="camLocation" placeholder="Ex: Recepção - Prédio A">
+            </div>
+            <div class="form-group">
+                <label>Tipo</label>
+                <select id="camType">
+                    <option value="IP">IP</option>
+                    <option value="Analogica">Analógica</option>
+                    <option value="PTZ">PTZ</option>
+                    <option value="Fisheye">Fisheye</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Marca</label>
+                <input type="text" id="camBrand" placeholder="Ex: Hikvision, Intelbras">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="addCamera()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados iniciais de exemplo
+        let cameras = [
+            {
+                id: 1,
+                name: "Câmera Entrada Principal",
+                ip: "192.168.1.101",
+                location: "Recepção - Prédio A",
+                type: "IP",
+                brand: "Hikvision",
+                status: "online",
+                lastCheck: "30/07/2025 14:30:22"
+            },
+            {
+                id: 2,
+                name: "Câmera Estacionamento",
+                ip: "192.168.1.102",
+                location: "Estacionamento Subsolo",
+                type: "IP",
+                brand: "Intelbras",
+                status: "online",
+                lastCheck: "30/07/2025 14:30:18"
+            },
+            {
+                id: 3,
+                name: "Câmera Corredor Norte",
+                ip: "192.168.1.103",
+                location: "Corredor Norte - 1º Andar",
+                type: "PTZ",
+                brand: "Hikvision",
+                status: "offline",
+                lastCheck: "30/07/2025 14:25:10"
+            },
+            {
+                id: 4,
+                name: "Câmera Depósito",
+                ip: "192.168.1.104",
+                location: "Depósito - Térreo",
+                type: "Analogica",
+                brand: "Intelbras",
+                status: "online",
+                lastCheck: "30/07/2025 14:30:20"
+            },
+            {
+                id: 5,
+                name: "Câmera Portaria 2",
+                ip: "192.168.1.105",
+                location: "Portaria Lateral",
+                type: "IP",
+                brand: "Dahua",
+                status: "offline",
+                lastCheck: "30/07/2025 14:20:05"
+            },
+            {
+                id: 6,
+                name: "Câmera Área de Cargas",
+                ip: "192.168.1.106",
+                location: "Doca de Cargas",
+                type: "Fisheye",
+                brand: "Hikvision",
+                status: "online",
+                lastCheck: "30/07/2025 14:30:15"
+            }
+        ];
+
+        let nextId = 7;
+
+        // Atualizar data e hora
+        function updateDateTime() {
+            const now = new Date();
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            document.getElementById('headerDate').textContent = now.toLocaleDateString('pt-BR', options);
+            document.getElementById('headerTime').textContent = now.toLocaleTimeString('pt-BR');
+        }
+
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        // Renderizar câmeras
+        function renderCameras(filteredCameras = null) {
+            const grid = document.getElementById('cameraGrid');
+            const list = filteredCameras || cameras;
+            
+            grid.innerHTML = '';
+
+            if (list.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; color:#a8d8ea; grid-column:1/-1; padding:40px;">Nenhuma câmera encontrada.</p>';
+                return;
+            }
+
+            list.forEach(cam => {
+                const statusClass = cam.status;
+                const statusText = cam.status === 'online' ? 'ONLINE' : 'OFFLINE';
+                const indicator = cam.status === 'online' 
+                    ? '<span class="indicator ok">✓</span>' 
+                    : '<span class="indicator fail">✗</span>';
+                const dotClass = cam.status === 'online' ? 'online' : 'offline';
+
+                const card = document.createElement('div');
+                card.className = `camera-card ${statusClass}`;
+                card.innerHTML = `
+                    <div class="camera-header">
+                        <span class="camera-name">${cam.name}</span>
+                        <span class="camera-status ${statusClass}">
+                            <span class="pulse-dot ${dotClass}"></span>
+                            ${statusText}
+                        </span>
+                    </div>
+                    <div class="camera-details">
+                        <div class="camera-detail-row">
+                            <span class="detail-label">IP</span>
+                            <span class="detail-value ip">${cam.ip}</span>
+                        </div>
+                        <div class="camera-detail-row">
+                            <span class="detail-label">Localização</span>
+                            <span class="detail-value">${cam.location}</span>
+                        </div>
+                        <div class="camera-detail-row">
+                            <span class="detail-label">Tipo</span>
+                            <span class="detail-value">${cam.type}</span>
+                        </div>
+                        <div class="camera-detail-row">
+                            <span class="detail-label">Marca</span>
+                            <span class="detail-value">${cam.brand}</span>
+                        </div>
+                        <div class="camera-detail-row">
+                            <span class="detail-label">Último Check</span>
+                            <span class="detail-value">${cam.lastCheck}</span>
+                        </div>
+                        <div class="camera-detail-row">
+                            <span class="detail-label">Status</span>
+                            <span class="detail-value">${indicator}</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Atualizar contadores
+            updateCounters();
+        }
+
+        // Atualizar contadores
+        function updateCounters() {
+            const total = cameras.length;
+            const online = cameras.filter(c => c.status === 'online').length;
+            const offline = cameras.filter(c => c.status === 'offline').length;
+
+            document.getElementById('totalCameras').textContent = `${total} câmeras`;
+            document.getElementById('onlineCount').textContent = online;
+            document.getElementById('offlineCount').textContent = offline;
+        }
+
+        // Filtrar câmeras
+        function filterCameras() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            if (query === '') {
+                renderCameras();
+                return;
+            }
+            const filtered = cameras.filter(cam => 
+                cam.name.toLowerCase().includes(query) || 
+                cam.ip.includes(query) ||
+                cam.location.toLowerCase().includes(query)
+            );
+            renderCameras(filtered);
+        }
+
+        // Simular refresh (verificar status)
+        function refreshAll() {
+            cameras.forEach(cam => {
+                // Simulação: 80% chance de online para câmeras já online, 20% para offline
+                if (cam.status === 'online') {
+                    cam.status = Math.random() > 0.1 ? 'online' : 'offline';
+                } else {
+                    cam.status = Math.random() > 0.8 ? 'online' : 'offline';
+                }
+                const now = new Date();
+                cam.lastCheck = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR');
+            });
+            renderCameras();
+        }
+
+        // Modal
+        function openModal() {
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            // Limpar campos
+            document.getElementById('camName').value = '';
+            document.getElementById('camIP').value = '';
+            document.getElementById('camLocation').value = '';
+            document.getElementById('camBrand').value = '';
+        }
+
+        // Adicionar câmera
+        function addCamera() {
+            const name = document.getElementById('camName').value.trim();
+            const ip = document.getElementById('camIP').value.trim();
+            const location = document.getElementById('camLocation').value.trim();
+            const type = document.getElementById('camType').value;
+            const brand = document.getElementById('camBrand').value.trim();
+
+            if (!name || !ip) {
+                alert('Preencha pelo menos o nome e o IP da câmera.');
+                return;
+            }
+
+            const now = new Date();
+            cameras.push({
+                id: nextId++,
+                name: name,
+                ip: ip,
+                location: location || 'Não informado',
+                type: type,
+                brand: brand || 'Não informado',
+                status: 'online',
+                lastCheck: now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR')
+            });
+
+            closeModal();
+            renderCameras();
+        }
+
+        // Fechar modal clicando fora
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Render inicial
+        renderCameras();
+    </script>
+</body>
+</html>
