@@ -422,7 +422,7 @@
     <!-- Controls -->
     <div class="controls">
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Buscar câmera por nome ou IP..." oninput="filterCameras()">
+            <input type="text" id="searchInput" aria-label="Buscar câmera por nome ou IP" placeholder="Buscar câmera por nome ou IP..." oninput="filterCameras()">
         </div>
         <div style="display: flex; gap: 10px;">
             <button class="btn btn-secondary" onclick="refreshAll()">⟳ Atualizar</button>
@@ -438,44 +438,46 @@
     </div>
 
     <!-- Modal Adicionar Câmera -->
-    <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal">
-            <h2>Adicionar Câmera</h2>
-            <div class="form-group">
-                <label>Nome da Câmera</label>
-                <input type="text" id="camName" placeholder="Ex: Câmera Entrada Principal">
-            </div>
-            <div class="form-group">
-                <label>Endereço IP</label>
-                <input type="text" id="camIP" placeholder="Ex: 192.168.1.100">
-            </div>
-            <div class="form-group">
-                <label>Localização</label>
-                <input type="text" id="camLocation" placeholder="Ex: Recepção - Prédio A">
-            </div>
-            <div class="form-group">
-                <label>Tipo</label>
-                <select id="camType">
-                    <option value="IP">IP</option>
-                    <option value="Analogica">Analógica</option>
-                    <option value="PTZ">PTZ</option>
-                    <option value="Fisheye">Fisheye</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Marca</label>
-                <input type="text" id="camBrand" placeholder="Ex: Hikvision, Intelbras">
-            </div>
-            <div class="modal-buttons">
-                <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-                <button class="btn btn-primary" onclick="addCamera()">Salvar</button>
-            </div>
+            <h2 id="modalTitle">Adicionar Câmera</h2>
+            <form id="cameraForm" onsubmit="addCamera(); return false;">
+                <div class="form-group">
+                    <label for="camName">Nome da Câmera</label>
+                    <input type="text" id="camName" placeholder="Ex: Câmera Entrada Principal">
+                </div>
+                <div class="form-group">
+                    <label for="camIP">Endereço IP</label>
+                    <input type="text" id="camIP" placeholder="Ex: 192.168.1.100">
+                </div>
+                <div class="form-group">
+                    <label for="camLocation">Localização</label>
+                    <input type="text" id="camLocation" placeholder="Ex: Recepção - Prédio A">
+                </div>
+                <div class="form-group">
+                    <label for="camType">Tipo</label>
+                    <select id="camType">
+                        <option value="IP">IP</option>
+                        <option value="Analogica">Analógica</option>
+                        <option value="PTZ">PTZ</option>
+                        <option value="Fisheye">Fisheye</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="camBrand">Marca</label>
+                    <input type="text" id="camBrand" placeholder="Ex: Hikvision, Intelbras">
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
         // Dados iniciais de exemplo
-        let cameras = [
+        const defaultCameras = [
             {
                 id: 1,
                 name: "Câmera Entrada Principal",
@@ -538,7 +540,26 @@
             }
         ];
 
-        let nextId = 7;
+        let cameras = loadCameras();
+        let nextId = cameras.reduce((max, cam) => Math.max(max, cam.id), 0) + 1;
+
+        function saveCameras() {
+            localStorage.setItem('camera-monitor-data', JSON.stringify(cameras));
+        }
+
+        function loadCameras() {
+            const stored = localStorage.getItem('camera-monitor-data');
+            if (!stored) return defaultCameras.slice();
+            try {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.every(cam => cam && typeof cam.id === 'number')) {
+                    return parsed;
+                }
+            } catch (error) {
+                console.warn('Falha ao carregar câmeras do localStorage:', error);
+            }
+            return defaultCameras.slice();
+        }
 
         // Atualizar data e hora
         function updateDateTime() {
@@ -654,6 +675,7 @@
                 cam.lastCheck = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR');
             });
             renderCameras();
+            saveCameras();
         }
 
         // Modal
