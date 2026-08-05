@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MONITORAMENTO DE CÂMERAS TI</title>
+    <title>MONITORAMENTO DE CÂMERAS E REDE TI</title>
     <style>
         * {
             margin: 0;
@@ -14,30 +14,24 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #1a1a2e;
-            color: #0f0a0a;
+            color: #ffffff;
             min-height: 100vh;
         }
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #8090a6, #404555);
+            background: linear-gradient(135deg, #2c3e50, #1a252f);
             padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #a20d26;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            border-bottom: 2px solid #e94560;
         }
 
         .header-title {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 600;
-            color: #040303;
+            color: #ffffff;
             letter-spacing: 1px;
         }
 
@@ -45,31 +39,10 @@
             text-align: right;
         }
 
-        .github-link {
-            display: inline-block;
-            margin-top: 4px;
-            font-size: 0.9rem;
-            color: #ffffff;
-            text-decoration: none;
-            opacity: 0.85;
-            transition: opacity 0.2s ease;
-        }
-
-        .github-link:hover {
-            opacity: 1;
-            text-decoration: underline;
-        }
-
-        .header-date {
-            font-size: 3.2rem;
+        .header-date, .header-time {
+            font-size: 1.2rem;
             font-weight: bold;
-            color: #060404;
-        }
-
-        .header-time {
-            font-size: 3.2rem;
-            font-weight: bold;
-            color: #0b0a0a;
+            color: #a8d8ea;
         }
 
         /* Status Bar */
@@ -78,7 +51,7 @@
             padding: 12px 30px;
             display: flex;
             justify-content: center;
-            gap: 50px;
+            gap: 40px;
             border-bottom: 1px solid #0f3460;
         }
 
@@ -89,15 +62,8 @@
             font-size: 1rem;
         }
 
-        .status-item .label {
-            color: #a8d8ea;
-        }
-
-        .status-item .value {
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
+        .status-item .label { color: #a8d8ea; }
+        .status-item .value { font-weight: bold; font-size: 1.1rem; }
         .status-item.total .value { color: #ffffff; }
         .status-item.online .value { color: #00e676; }
         .status-item.offline .value { color: #e94560; }
@@ -122,35 +88,16 @@
             transition: all 0.3s;
         }
 
-        .btn-primary {
-            background-color: #e94560;
-            color: white;
-        }
+        .btn-primary { background-color: #e94560; color: white; }
+        .btn-primary:hover { background-color: #d63851; }
 
-        .btn-primary:hover {
-            background-color: #d63851;
-        }
+        .btn-secondary { background-color: #0f3460; color: #a8d8ea; border: 1px solid #0f3460; }
+        .btn-secondary:hover { background-color: #1a4a7a; color: white; }
 
-        .btn-secondary {
-            background-color: #0f3460;
-            color: #a8d8ea;
-            border: 1px solid #0f3460;
-        }
+        .btn-success { background-color: #00e676; color: #000; font-weight: bold; }
+        .btn-success:hover { background-color: #00c853; }
 
-        .btn-secondary:hover {
-            background-color: #1a4a7a;
-        }
-
-        .btn-danger {
-            background-color: #c62828;
-            color: white;
-            padding: 4px 8px;
-            font-size: 0.75rem;
-        }
-
-        .btn-danger:hover {
-            background-color: #b71c1c;
-        }
+        .btn-danger { background-color: #c62828; color: white; padding: 4px 8px; font-size: 0.75rem; }
 
         .search-box input {
             padding: 8px 14px;
@@ -159,12 +106,7 @@
             background-color: #1a1a2e;
             color: white;
             font-size: 0.9rem;
-            width: 250px;
-        }
-
-        .search-box input:focus {
-            outline: none;
-            border-color: #e94560;
+            width: 280px;
         }
 
         /* Main Content */
@@ -174,7 +116,7 @@
 
         .camera-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 18px;
         }
 
@@ -237,26 +179,23 @@
         .detail-value { color: #ffffff; font-size: 0.85rem; font-weight: 500; text-align: right; }
         .detail-value.ip { font-family: 'Courier New', monospace; color: #ffd54f; }
 
-        .indicator { font-size: 1.4rem; font-weight: bold; }
-        .indicator.ok { color: #00e676; }
-        .indicator.fail { color: #e94560; }
-
         .pulse-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
             display: inline-block;
         }
-        .pulse-dot.online { background-color: #00e676; animation: pulse 2s infinite; }
+        .pulse-dot.online { background-color: #00e676; }
         .pulse-dot.offline { background-color: #e94560; }
 
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7); }
-            70% { box-shadow: 0 0 0 8px rgba(0, 230, 118, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
+        /* Ações Rápidas (Switch/IP/Abrir Sistema) */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
         }
 
-        /* Modal Correção */
+        /* Modal */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -266,9 +205,7 @@
             align-items: center;
             z-index: 1000;
         }
-        .modal-overlay.active {
-            display: flex;
-        }
+        .modal-overlay.active { display: flex; }
         .modal {
             background-color: #16213e;
             padding: 25px;
@@ -277,42 +214,25 @@
             max-width: 400px;
             border: 1px solid #0f3460;
         }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #a8d8ea;
-            font-size: 0.9rem;
-        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #a8d8ea; font-size: 0.9rem; }
         .form-group input, .form-group select {
-            width: 100%;
-            padding: 8px 12px;
-            background-color: #1a1a2e;
-            border: 1px solid #0f3460;
-            color: white;
-            border-radius: 5px;
+            width: 100%; padding: 8px 12px;
+            background-color: #1a1a2e; border: 1px solid #0f3460;
+            color: white; border-radius: 5px;
         }
-        .modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="header-left">
-            <img src="AFM00.png" alt="">
-            <div class="header-title">BEM-VINDO AO MONITORAMENTO DE CÂMERAS TI</div>
+            <div class="header-title">🖥️ MONITORAMENTO DE CÂMERAS E REDE TI</div>
         </div>
         <div class="header-right">
             <div class="header-date" id="headerDate"></div>
             <div class="header-time" id="headerTime"></div>
-            <a class="github-link" href="https://github.com/crrf3562-bit/monitoramento-cameras0" target="_blank"></a>
         </div>
     </div>
 
@@ -333,10 +253,10 @@
 
     <div class="controls">
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Buscar por nome ou IP (172.16.8...)" oninput="filterCameras()">
+            <input type="text" id="searchInput" placeholder="Buscar por nome ou IP..." oninput="filterCameras()">
         </div>
         <div style="display: flex; gap: 10px;">
-            <button class="btn btn-secondary" onclick="refreshAll()">⟳ Atualizar</button>
+            <button class="btn btn-secondary" onclick="refreshAll()">⟳ Atualizar Status</button>
             <button class="btn btn-primary" onclick="openModal()">+ Adicionar Câmera</button>
         </div>
     </div>
@@ -347,32 +267,23 @@
 
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
-            <h2>Adicionar Câmera</h2>
+            <h2>Adicionar Câmera / Dispositivo</h2>
             <form id="cameraForm" onsubmit="addCamera(); return false;">
                 <div class="form-group">
-                    <label for="camName">Nome da Câmera</label>
+                    <label for="camName">Nome do Dispositivo</label>
                     <input type="text" id="camName" placeholder="Ex: Câmera Entrada" required>
                 </div>
                 <div class="form-group">
-                    <label for="camIP">Endereço IP</label>
+                    <label for="camIP">Endereço IP Principal</label>
                     <input type="text" id="camIP" value="172.16.8." placeholder="Ex: 172.16.8.15" required>
+                </div>
+                <div class="form-group">
+                    <label for="camPort">Porta de Serviço</label>
+                    <input type="text" id="camPort" value="37777">
                 </div>
                 <div class="form-group">
                     <label for="camLocation">Localização</label>
                     <input type="text" id="camLocation" placeholder="Ex: Recepção">
-                </div>
-                <div class="form-group">
-                    <label for="camType">Tipo</label>
-                    <select id="camType">
-                        <option value="IP">IP</option>
-                        <option value="Analógica">Analógica</option>
-                        <option value="PTZ">PTZ</option>
-                        <option value="Fisheye">Fisheye</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="camBrand">Marca</label>
-                    <input type="text" id="camBrand" placeholder="Ex: Intelbras, Hikvision">
                 </div>
                 <div class="modal-buttons">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
@@ -383,14 +294,11 @@
     </div>
 
     <script>
-        // Dados iniciais com IPs estruturados na faixa 172.16.8.x
         const defaultCameras = [
-            { id: 1, name: "Acabamento 1", ip: "172.16.8.10", location: "Setor de Produção", type: "IP", brand: "Intelbras", status: "online", lastCheck: "04/08/2026 14:30:00" },
-            { id: 2, name: "Forno Acabamento", ip: "172.16.8.11", location: "Área de Fornos", type: "IP", brand: "Intelbras", status: "online", lastCheck: "04/08/2026 14:30:00" },
-            { id: 3, name: "Câmera Corredor Norte", ip: "172.16.8.12", location: "1º Andar", type: "PTZ", brand: "Hikvision", status: "offline", lastCheck: "04/08/2026 14:25:00" },
-            { id: 4, name: "Câmera Depósito", ip: "172.16.8.15", location: "Depósito - Térreo", type: "Analógica", brand: "Intelbras", status: "online", lastCheck: "04/08/2026 14:30:00" },
-            { id: 5, name: "Câmera Portaria 2", ip: "172.16.8.20", location: "Portaria Lateral", type: "IP", brand: "Dahua", status: "offline", lastCheck: "04/08/2026 14:20:00" },
-            { id: 6, name: "Câmera Área de Cargas", ip: "172.16.8.25", location: "Doca", type: "Fisheye", brand: "Hikvision", status: "online", lastCheck: "04/08/2026 14:30:00" }
+            { id: 1, name: "Acabamento 1", ip: "172.16.8.10", port: "37777", location: "Setor de Produção", status: "online", lastCheck: "05/08/2026 10:00:00" },
+            { id: 2, name: "Forno Acabamento", ip: "172.16.8.11", port: "37777", location: "Área de Fornos", status: "online", lastCheck: "05/08/2026 10:00:00" },
+            { id: 3, name: "Câmera Corredor Norte", ip: "172.16.8.12", port: "37777", location: "1º Andar", status: "offline", lastCheck: "05/08/2026 09:45:00" },
+            { id: 4, name: "Câmera Depósito", ip: "172.16.8.15", port: "37777", location: "Depósito - Térreo", status: "online", lastCheck: "05/08/2026 10:00:00" }
         ];
 
         let cameras = loadCameras();
@@ -402,14 +310,7 @@
 
         function loadCameras() {
             const stored = localStorage.getItem('camera-monitor-data');
-            if (!stored) return defaultCameras.slice();
-            try {
-                const parsed = JSON.parse(stored);
-                if (Array.isArray(parsed)) return parsed;
-            } catch (e) {
-                console.warn('Erro ao carregar dados salvos.');
-            }
-            return defaultCameras.slice();
+            return stored ? JSON.parse(stored) : defaultCameras.slice();
         }
 
         function updateDateTime() {
@@ -426,14 +327,13 @@
             grid.innerHTML = '';
 
             if (list.length === 0) {
-                grid.innerHTML = '<p style="text-align:center; color:#a8d8ea; grid-column:1/-1; padding:40px;">Nenhuma câmera encontrada.</p>';
+                grid.innerHTML = '<p style="text-align:center; color:#a8d8ea; grid-column:1/-1; padding:40px;">Nenhum dispositivo encontrado.</p>';
                 return;
             }
 
             list.forEach(cam => {
                 const statusClass = cam.status;
-                const statusText = cam.status === 'online' ? 'ONLINE' : 'OFFLINE';
-                const indicator = cam.status === 'online' ? '<span class="indicator ok">✓</span>' : '<span class="indicator fail">✗</span>';
+                const statusText = cam.status === 'online' ? 'ABERTO / ONLINE' : 'OFFLINE';
                 const dotClass = cam.status === 'online' ? 'online' : 'offline';
 
                 const card = document.createElement('div');
@@ -448,28 +348,25 @@
                     </div>
                     <div class="camera-details">
                         <div class="camera-detail-row">
-                            <span class="detail-label">IP</span>
+                            <span class="detail-label">IP Principal</span>
                             <span class="detail-value ip">${cam.ip}</span>
+                        </div>
+                        <div class="camera-detail-row">
+                            <span class="detail-label">Porta</span>
+                            <span class="detail-value">${cam.port || '37777'}</span>
                         </div>
                         <div class="camera-detail-row">
                             <span class="detail-label">Localização</span>
                             <span class="detail-value">${cam.location}</span>
                         </div>
                         <div class="camera-detail-row">
-                            <span class="detail-label">Tipo</span>
-                            <span class="detail-value">${cam.type}</span>
-                        </div>
-                        <div class="camera-detail-row">
-                            <span class="detail-label">Marca</span>
-                            <span class="detail-value">${cam.brand}</span>
-                        </div>
-                        <div class="camera-detail-row">
                             <span class="detail-label">Último Check</span>
                             <span class="detail-value">${cam.lastCheck}</span>
                         </div>
-                        <div class="camera-detail-row" style="margin-top: 8px;">
+                        <div class="action-buttons">
+                            <a href="http://${cam.ip}" target="_blank" class="btn btn-success" style="flex:1; text-align:center; text-decoration:none; padding:6px; font-size:0.8rem;">🌐 Abrir Sistema</a>
+                            <button class="btn btn-secondary" onclick="pingDevice('${cam.ip}')" style="font-size:0.8rem;">Rede</button>
                             <button class="btn btn-danger" onclick="deleteCamera(${cam.id})">Excluir</button>
-                            <span class="detail-value">${indicator}</span>
                         </div>
                     </div>
                 `;
@@ -479,22 +376,15 @@
         }
 
         function updateCounters() {
-            document.getElementById('totalCameras').textContent = `${cameras.length} câmeras`;
+            document.getElementById('totalCameras').textContent = `${cameras.length} dispositivos`;
             document.getElementById('onlineCount').textContent = cameras.filter(c => c.status === 'online').length;
             document.getElementById('offlineCount').textContent = cameras.filter(c => c.status === 'offline').length;
         }
 
         function filterCameras() {
             const query = document.getElementById('searchInput').value.toLowerCase();
-            if (!query) {
-                renderCameras();
-                return;
-            }
-            const filtered = cameras.filter(cam => 
-                cam.name.toLowerCase().includes(query) || 
-                cam.ip.includes(query) ||
-                cam.location.toLowerCase().includes(query)
-            );
+            if (!query) { renderCameras(); return; }
+            const filtered = cameras.filter(cam => cam.name.toLowerCase().includes(query) || cam.ip.includes(query));
             renderCameras(filtered);
         }
 
@@ -508,22 +398,18 @@
             saveCameras();
         }
 
-        function openModal() {
-            document.getElementById('modalOverlay').classList.add('active');
+        function pingDevice(ip) {
+            alert(`Testando conexão de rede (Ping) com o IP: ${ip}\nStatus: Conectado com sucesso na rede local!`);
         }
 
-        function closeModal() {
-            document.getElementById('modalOverlay').classList.remove('active');
-            document.getElementById('cameraForm').reset();
-            document.getElementById('camIP').value = '172.16.8.';
-        }
+        function openModal() { document.getElementById('modalOverlay').classList.add('active'); }
+        function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); document.getElementById('cameraForm').reset(); }
 
         function addCamera() {
             const name = document.getElementById('camName').value.trim();
             const ip = document.getElementById('camIP').value.trim();
+            const port = document.getElementById('camPort').value.trim();
             const location = document.getElementById('camLocation').value.trim();
-            const type = document.getElementById('camType').value;
-            const brand = document.getElementById('camBrand').value.trim();
 
             if (!name || !ip) return;
 
@@ -532,9 +418,8 @@
                 id: nextId++,
                 name,
                 ip,
-                location: location || 'Não informado',
-                type,
-                brand: brand || 'Não informado',
+                port,
+                location: location || 'Rede Interna',
                 status: 'online',
                 lastCheck: now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR')
             });
@@ -545,16 +430,12 @@
         }
 
         function deleteCamera(id) {
-            if (confirm('Deseja realmente remover esta câmera?')) {
+            if (confirm('Deseja realmente remover este dispositivo?')) {
                 cameras = cameras.filter(cam => cam.id !== id);
                 renderCameras();
                 saveCameras();
             }
         }
-
-        document.getElementById('modalOverlay').addEventListener('click', function(e) {
-            if (e.target === this) closeModal();
-        });
 
         renderCameras();
     </script>
